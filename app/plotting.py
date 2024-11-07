@@ -3,8 +3,31 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import streamlit as st
+import pandas as pd
 from src.pricing.binomial_model import binomial_option_price
 from src.calculations.pnl import calculate_pnl
+
+def price_profit_table(strike_price, price_per_option, contracts, price_range):
+    data = []
+    for price in price_range:
+        profit = max(0, price - strike_price) * contracts * 100 - (price_per_option * contracts * 100)
+        percent_change = (profit / (price_per_option * contracts * 100)) * 100
+        data.append([price, profit, percent_change])
+
+    df = pd.DataFrame(data, columns=["Stock Price", "Profit/Loss", "% Change"])
+    st.write(df)
+    
+def plot_pnl_chart(strike_price, price_per_option, contracts, price_range):
+    profits = [(max(0, price - strike_price) * contracts * 100 - (price_per_option * contracts * 100)) for price in price_range]
+    
+    plt.figure(figsize=(10, 6))
+    plt.plot(price_range, profits, label="P&L")
+    plt.xlabel("Stock Price at Expiration")
+    plt.ylabel("Profit/Loss ($)")
+    plt.title("Profit and Loss vs Stock Price at Expiration")
+    plt.axhline(0, color="black", linestyle="--")
+    plt.legend()
+    st.pyplot(plt)    
 
 def plot_pnl_vs_stock(option_params, position_params):
     """
